@@ -22,8 +22,8 @@ title: TJ's Blog
 email: xowls157@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   Themed by ejjoo
-# baseurl: "/" # the subpath of your site, e.g. /blog
-# url: "http://ejjoo.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+# baseurl: "https://tj-kor.github.io/" # the subpath of your site, e.g. /blog
+url: "https://tj-kor.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 github_username: TJ-KOR
 highlighter: rouge
 svg:
