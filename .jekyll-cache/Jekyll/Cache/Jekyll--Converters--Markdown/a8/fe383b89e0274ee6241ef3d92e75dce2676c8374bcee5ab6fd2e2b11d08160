@@ -1,0 +1,168 @@
+I"�@<h2 id="문제">문제</h2>
+
+<p>안녕하세요.<br />
+ 백준에서 삼성 SW 역량 테스트 기출 문제집에 게시된 <a href="https://www.acmicpc.net/problem/14891">14891번 톱니바퀴</a> 문제 풀이를 소개하겠습니다.</p>
+
+<p>이번 문제는 톱니 바퀴를 일정 횟수 회전시켜 결과를 확인하는 문제입니다.<br />
+ 톱니 바퀴가 맞닿는 부분의 극이 다르면 맞닿는 톱니를 회전시키는게 가능하고, 극이 같다면 불가능 합니다.
+ 먼저 문제를 정리하면 아래와 같습니다.</p>
+
+<h3 id="주어진-정보">주어진 정보</h3>
+
+<ul>
+  <li>길이가 8인 정수 : 톱니 바퀴의 극</li>
+  <li>극 값 : 0은 N, 1은 S</li>
+  <li>K : 명령의 수</li>
+  <li>명령 : 톱니번호(n), 회전 방향(1 or -1)</li>
+</ul>
+
+<h3 id="해결-방향">해결 방향</h3>
+
+<p>복잡한 수를 계산하거나 탐색 알고리즘을 필요로 하지 않습니다. 단순히 조건에 맞추어 1차원 배열을 회전만 하면 되는 문제 입니다.</p>
+
+<p>명령에서 선택된 톱니 바퀴를 회전 시키는 함수를 하나 작성합니다.
+ 그리고 재귀적으로 옆의 다른 톱니 바퀴들을 작성한 함수로 회전시키면, 모든 톱니 바퀴들을 회전 시킬 수 있습니다.</p>
+
+<p>주의할 점은 옆에 톱니 바퀴의 존재 여부와 톱니 바퀴의 회전 여부 입니다.</p>
+
+<p><br />
+ <img src="https://onlinejudgeimages.s3-ap-northeast-1.amazonaws.com/problem/14891/4.png" alt="톱니 예시" /></p>
+<center><em> 톱니 바퀴 예시 </em></center>
+
+<h2 id="풀이">풀이</h2>
+<h3 id="풀이-코드">풀이 코드</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;string&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="cm">/*
+ * N극은 0, S극은 1
+ * K : 회전 명령 갯수
+ * 명령 : 톱니번호 , 방향 (1 : 시계, -1 : 반시계)
+*/</span>
+
+<span class="n">vector</span><span class="o">&lt;</span> <span class="n">string</span> <span class="o">&gt;</span> <span class="n">arr</span><span class="p">;</span>
+<span class="n">vector</span><span class="o">&lt;</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">cmd</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">K</span><span class="p">;</span>
+
+
+<span class="c1">// 각 톱니의 12시 방향 체크</span>
+<span class="kt">int</span> <span class="nf">get_score</span><span class="p">()</span> <span class="p">{</span>
+	<span class="kt">int</span> <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	
+	<span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">'1'</span><span class="p">)</span>	<span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">'1'</span><span class="p">)</span>	<span class="n">score</span> <span class="o">+=</span> <span class="mi">2</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">'1'</span><span class="p">)</span>	<span class="n">score</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">'1'</span><span class="p">)</span>	<span class="n">score</span> <span class="o">+=</span> <span class="mi">8</span><span class="p">;</span>
+
+	<span class="k">return</span> <span class="n">score</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 회전 후, 양 옆의 톱니 바퀴에 대해 재귀 진행</span>
+<span class="kt">void</span> <span class="nf">rotate</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">int</span> <span class="n">wise</span><span class="p">,</span> <span class="kt">int</span> <span class="n">prev_n</span><span class="p">)</span> <span class="p">{</span>
+	<span class="kt">bool</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">;</span>
+	<span class="n">left</span> <span class="o">=</span> <span class="n">right</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">prev_n</span> <span class="o">||</span> <span class="n">arr</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">arr</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">6</span><span class="p">])</span> <span class="n">left</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="mi">4</span> <span class="o">||</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">prev_n</span> <span class="o">||</span> <span class="n">arr</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="n">arr</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span> <span class="n">right</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+	<span class="c1">// 시계 방향 회전</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">wise</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">string</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">n</span><span class="p">].</span><span class="n">substr</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+		<span class="n">arr</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span> <span class="o">+</span> <span class="n">arr</span><span class="p">[</span><span class="n">n</span><span class="p">].</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="c1">// 시계 반대 방향 회전</span>
+	<span class="k">else</span> <span class="p">{</span>
+		<span class="n">string</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">n</span><span class="p">].</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+		<span class="n">arr</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">n</span><span class="p">].</span><span class="n">substr</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="n">tmp</span><span class="p">;</span>
+	<span class="p">}</span>
+	
+	<span class="c1">// 다음 톱니 바퀴 회전 방향 반전</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">wise</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="n">wise</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+	<span class="k">else</span> <span class="n">wise</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+	 
+	<span class="c1">// 다음 톱니 바퀴 회전</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">left</span> <span class="o">==</span> <span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">rotate</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wise</span><span class="p">,</span> <span class="n">n</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">right</span> <span class="o">==</span> <span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">rotate</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wise</span><span class="p">,</span> <span class="n">n</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">solution</span><span class="p">()</span> <span class="p">{</span>
+	
+	<span class="c1">// 명령 수 만큼 회전 진행</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>		<span class="c1">// 선택된 톱니바퀴 번호</span>
+		<span class="kt">int</span> <span class="n">wise</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>	<span class="c1">// 회전 방향</span>
+
+		<span class="n">rotate</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">wise</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>		<span class="c1">// 회전 실행</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">get_score</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">arr</span> <span class="o">=</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span> <span class="c1">// 1~4까지 표현하기 위해 톱니바퀴 수를 5로</span>
+	
+	<span class="c1">// 톱니바퀴 초기화</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">string</span> <span class="n">tmp_s</span><span class="p">;</span>
+		<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">tmp_s</span><span class="p">;</span>
+		<span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_s</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="c1">// 명령 수 입력</span>
+	<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">K</span><span class="p">;</span>
+	<span class="n">cmd</span> <span class="o">=</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">));</span> 
+
+	<span class="c1">// 명령 초기화</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">cmd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>	<span class="c1">// 톱니 번호</span>
+		<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">cmd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>	<span class="c1">// 회전 방향</span>
+	<span class="p">}</span>
+	
+	<span class="c1">// 시뮬레이션 진행</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">solution</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="해설">해설</h3>
+
+<ul>
+  <li>solution() : 모든 명령에 따라 회전 실행, get_socore()를 이용한 점수 계산</li>
+  <li>rotate() : 주어진 번호와 방향에 따라 톱니바퀴 회전
+    <ul>
+      <li>양 옆의 회전 가능한 톱니가 있는지 체크</li>
+      <li>현재 톱니바퀴 회전
+        <ul>
+          <li>ex) 1차원 배열 : [1,2,..,7,8] -&gt; [2,3,..,8,1] or [8,1,..,6,7]</li>
+        </ul>
+      </li>
+      <li>회전 가능한 톱니 바퀴가 있다면 rotate() 재귀호출 
+ <br /></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="앗-이걸-생각-못했네">앗 이걸 생각 못했네?</h3>
+<ul>
+  <li>1차원 배열 회전을 양방향으로 좀 더 간단하게 하는 방법이 없을까?
+    <ul>
+      <li>deque의 push, pop 활용 (1차 풀이, 아래 링크 참고)</li>
+      <li>문자열 계산 활용 (현재 풀이)</li>
+    </ul>
+  </li>
+  <li>딱히 헷갈릴만한 부분은 없는 것 같다…</li>
+</ul>
+
+<h2 id="다른-풀이">다른 풀이</h2>
+<p><a href="https://github.com/TJ-kor/Solutions/blob/main/Baekjoon/14891_wheel_gear.cpp">14891번 톱니바퀴 1차 풀이</a></p>
+
+<p><a href="https://github.com/TJ-kor/Solutions">기타 다른 문제 풀이 코드 (github)</a></p>
+:ET

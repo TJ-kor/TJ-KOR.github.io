@@ -1,0 +1,153 @@
+I"�2<h2 id="문제">문제</h2>
+
+<p>안녕하세요.<br />
+ 백준에서 삼성 SW 역량 테스트 기출 문제집에 게시된 <a href="https://www.acmicpc.net/problem/14890">14890번 경사로</a> 문제 풀이를 소개하겠습니다.</p>
+
+<p>이번 문제는 많은 문제에서 빈번하게 다루는 2차원 배열을 가지고 길을 찾는 문제입니다. 여러 갈래로 나뉜 길의 방향을 찾는 것은 아니고 <ins>주어진 길이 이동 가능한지</ins> 체크를 하는 문제 입니다. 따라서 조건 처리를 잘 하면 풀 수 있는 문제입니다.</p>
+
+<p>먼저 문제를 정리하면 아래와 같습니다.</p>
+
+<h3 id="주어진-정보">주어진 정보</h3>
+
+<ul>
+  <li>N x N 배열 : 지도를 의미</li>
+  <li>배열 요소 값 : 지도 위치에 해당하는 땅 높이(층)</li>
+  <li>L : 층을 잇는 경사로의 길이</li>
+</ul>
+
+<h3 id="해결-방향">해결 방향</h3>
+
+<p>크게 두 단계로 나누도록 하겠습니다.<br />
+ 첫 번째로 가로방향의 길을 전부 확인 후, 두 번째에는 세로 방향의 길을 전부 찾습니다.</p>
+
+<p>2차원 배열에서는 가로-세로의 방향이 있지만, <ins>어느 방향의 길이든 선택하고나면 1차원 배열로 모양이 같아집니다.</ins> 
+ 이러한 점을 이용하여 하나의 함수를 작성해 모든 방향의 길을 확인할 수 있습니다.</p>
+
+<p>아래는 경사로의 예시와, 2차원 배열에서 이동 가능한 길을 파란색 점선 박스로 표시한 예시 입니다.</p>
+
+<p><br />
+ <img src="https://onlinejudgeimages.s3-ap-northeast-1.amazonaws.com/problem/14890/3.png" alt="경사로 예시" /></p>
+<center><em> 경사로 예시 </em></center>
+
+<p><br /><br /><br /></p>
+
+<p><img src="https://upload.acmicpc.net/255e47cf-0988-4b7f-b81c-2742f010a4c5/-/preview/" alt="TileImage" /></p>
+<center><em> 색으로 구분된 이동 가능한 길과 불가능한 길 </em></center>
+
+<h2 id="풀이">풀이</h2>
+<h3 id="풀이-코드">풀이 코드</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">N</span><span class="p">,</span> <span class="n">L</span><span class="p">;</span>
+<span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">map</span><span class="p">;</span>
+
+<span class="kt">bool</span> <span class="nf">run_road</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">road</span><span class="p">)</span> <span class="p">{</span>
+	<span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>					<span class="c1">// 위치</span>
+	<span class="kt">int</span> <span class="n">len_flat</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>			<span class="c1">// 지나온 평평한 길 길이</span>
+	<span class="kt">int</span> <span class="n">cur_h</span> <span class="o">=</span> <span class="n">road</span><span class="p">.</span><span class="n">front</span><span class="p">();</span>	<span class="c1">// 현재 땅 높이</span>
+
+	<span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">cur_h</span> <span class="o">-</span> <span class="n">road</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">cur_h</span> <span class="o">&lt;</span> <span class="n">road</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+			<span class="c1">// 올라가는 경우</span>
+			<span class="c1">// 지나온 땅의 평평한 길이가 L보다 작으면 경사로 설치 불가</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">len_flat</span> <span class="o">&lt;</span> <span class="n">L</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+			<span class="n">cur_h</span> <span class="o">=</span> <span class="n">road</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+			<span class="n">len_flat</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+			<span class="n">i</span><span class="o">++</span><span class="p">;</span>
+		<span class="p">}</span>
+		<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cur_h</span> <span class="o">&gt;</span> <span class="n">road</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+			<span class="c1">// 내려가는 경우</span>
+			<span class="n">len_flat</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+			<span class="n">cur_h</span> <span class="o">=</span> <span class="n">road</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+			<span class="k">while</span> <span class="p">(</span><span class="n">len_flat</span> <span class="o">&lt;</span> <span class="n">L</span><span class="p">)</span> <span class="p">{</span>
+				<span class="n">i</span><span class="o">++</span><span class="p">;</span>
+				<span class="n">len_flat</span><span class="o">++</span><span class="p">;</span>
+
+				<span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">cur_h</span> <span class="o">!=</span> <span class="n">road</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+			<span class="p">}</span>
+			<span class="n">i</span><span class="o">++</span><span class="p">;</span>
+			<span class="n">len_flat</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="p">}</span>
+		<span class="k">else</span> <span class="p">{</span>
+			<span class="c1">// 평평한 길 지나는 경우</span>
+			<span class="n">len_flat</span><span class="o">++</span><span class="p">;</span>
+			<span class="n">i</span><span class="o">++</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">solution</span><span class="p">()</span> <span class="p">{</span>
+	<span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">run_road</span><span class="p">(</span><span class="n">map</span><span class="p">[</span><span class="n">c</span><span class="p">]))</span> <span class="n">count</span><span class="o">++</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">vector</span><span class="o">&lt;</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">tmp_road</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span>
+			<span class="n">tmp_road</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">map</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">r</span><span class="p">]);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">run_road</span><span class="p">(</span><span class="n">tmp_road</span><span class="p">))</span> <span class="n">count</span><span class="o">++</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">count</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">N</span> <span class="o">&gt;&gt;</span> <span class="n">L</span><span class="p">;</span>
+	<span class="n">map</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">));</span>
+	
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">map</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">r</span><span class="p">];</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">solution</span><span class="p">();</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="해설">해설</h3>
+
+<ul>
+  <li>solution() : 가로, 세로 각 방향 길들을 전부 확인</li>
+  <li>run_road() : 주어진 길을 한칸씩 이동하면서 끝에 도달할 수 있는지 확인
+    <ul>
+      <li>1칸 차이의 높,낮은 칸을 연결</li>
+      <li>L 길이 만큼 공간에 경사로 설치</li>
+      <li>경우의 수
+        <ol>
+          <li>높은 칸 만나는 경우
+            <ul>
+              <li>지나온 평지의 길이가 L 이상인 경우</li>
+            </ul>
+          </li>
+          <li>낮은 칸 만나는 경우
+            <ul>
+              <li>일단 설치하고 한칸씩 전진</li>
+              <li>L만큼 전진하지 못한다면 이동 불가능한 길</li>
+            </ul>
+          </li>
+          <li>평평한 땅 경우
+            <ul>
+              <li>그냥 이동<br />
+ <br /></li>
+            </ul>
+          </li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="앗-이걸-생각-못했네">앗 이걸 생각 못했네?</h3>
+<ul>
+  <li>경사로를 놓는 수의 제한은 없다.</li>
+  <li>경사로를 내려오고 바로 경사로가 또 이어질 수도 있다.</li>
+</ul>
+:ET

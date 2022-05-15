@@ -40,13 +40,13 @@ author: TJ
 #   "Copyright (c) 2017-{currentYear} <a href="https://example.com">{author}</a>"
 #   "Copyright © 2017-2021 Foobar"
 #
-copyright: "Unpublished Work (cleft) 2022-{currentYear} {author}"
+copyright: "Unpublished Work (cleft) 2020-{currentYear} {author}"
 
 description: >- # this means to ignore newlines until "baseurl:"
-  인공지능 개발자 TJ 입니다.
+  머신러닝 개발자 TJ 입니다.
 
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://tj-kor.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://TJ-KOR.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 favicon: "" # the favicon for your site
 
 # Yat date format
@@ -70,7 +70,7 @@ yat:
   sitemap: true
 
 # If you want to change site language, you can set lang option
-# lang: "en"  # default lang is en
+lang: "ko"  # default lang is en
 
 # Translate languges
 # langs refer to https://cloud.google.com/translate/docs/languages

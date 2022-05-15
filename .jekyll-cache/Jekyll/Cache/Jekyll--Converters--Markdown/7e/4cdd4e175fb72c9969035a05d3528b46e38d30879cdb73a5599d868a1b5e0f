@@ -1,0 +1,243 @@
+I"n}<h2 id="문제">문제</h2>
+
+<p>안녕하세요.<br />
+ 백준에서 삼성 SW 역량 테스트 기출 문제집에 게시된 <a href="https://www.acmicpc.net/problem/16235">16235번 나무재테크</a> 문제 풀이를 소개하겠습니다.</p>
+
+<p>이번 문제는 2차원 배열 내에서 여러 나무를 심고, 영양분을 공급하며, 나무가 다시 번식하고 죽는것에 따라 남은 나무의 수가 몇개인지를 물어보고 있습니다.</p>
+
+<p>많은 분들이 아시겠지만, 이렇게 특정 작업을 일정 횟수만큼 진행 시키는 문제들을 시뮬레이션 문제라고 부릅니다.</p>
+
+<p>따라서 인덱스 체크와 조건 처리만 실수 없이 잘 해준다면 풀 수 있는 문제입니다.</p>
+
+<p>풀이 코드는 사람이 쉽게 이해 할 수 있는 코드를 지향하여 작성하였습니다. 따라서 최적의 성능을 가지는 코드가 아닐 수 있습니다.</p>
+
+<h3 id="주어진-정보">주어진 정보</h3>
+
+<ul>
+  <li>가장 처음에 양분은 모든 칸에 5만큼 들어있다.</li>
+  <li>봄에 나이만큼 양분을먹고, 나이가 1 증가.
+    <ul>
+      <li>칸에 여러 나무가 있다면, 나이가 어린순으로 양분 섭취.</li>
+    </ul>
+  </li>
+  <li>여름에는 양분을 먹지 못한 나무가 사망 후, (나이/2) 만큼 양분으로 변환.</li>
+  <li>가을에는 나무의 나이가 5의 배수라면, 인접한 8개의 칸에 나이가 1인 나무 번식.</li>
+  <li>겨울에는 처음 주어진 배열 A 만큼 양분 추가.</li>
+  <li>N : 땅의 크기</li>
+  <li>M : 처음 주어지는 나무의 갯수</li>
+  <li>K : 결과를 확인하는 년 수, 반복 실행하는 횟수</li>
+</ul>
+
+<h3 id="해결-방향">해결 방향</h3>
+
+<p>계산이 꼬이지 않게(실수를 방지하기 위해), 문제에서 주어진 계절마다의 작업들을 함수로 만들어 K 년 수 만큼 반복을 진행합니다.</p>
+
+<h2 id="풀이">풀이</h2>
+<h3 id="풀이-코드">풀이 코드</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;algorithm&gt;</span><span class="cp">
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">arr_tree</span><span class="p">;</span>	<span class="c1">// 각 위치에 있는 나무들의 나이 정보</span>
+<span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">arr_dead</span><span class="p">;</span>	<span class="c1">// 각 위치에 있는 죽은 나무들의 나이 정보</span>
+<span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="kt">int</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">arr_n</span><span class="p">;</span>				<span class="c1">// 각 위치에 있는 영양분의 정보</span>
+<span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="kt">int</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">A</span><span class="p">;</span>					<span class="c1">// 각 위치에 로봇이 공급할 영양분의 정보</span>
+
+<span class="kt">int</span> <span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">K</span><span class="p">;</span>	<span class="c1">//N : 땅의 크기, M : 초기 나무 갯수, K : 시뮬레이션 횟수</span>
+<span class="kt">int</span> <span class="n">dd</span><span class="p">[][</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+	<span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">},</span>
+	<span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+<span class="p">};</span>
+
+
+<span class="c1">// 땅 경계 체크</span>
+<span class="kt">bool</span> <span class="nf">check_boundary</span><span class="p">(</span><span class="kt">int</span> <span class="n">r</span><span class="p">,</span> <span class="kt">int</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">r</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">c</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+
+	<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 인접한 여덟 방향에 나무 추가</span>
+<span class="kt">void</span> <span class="nf">add_new_tree</span><span class="p">(</span><span class="kt">int</span> <span class="n">r</span><span class="p">,</span> <span class="kt">int</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">way</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">way</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">way</span><span class="o">++</span><span class="p">){</span>
+		<span class="kt">int</span> <span class="n">r_</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">way</span><span class="p">];</span>
+		<span class="kt">int</span> <span class="n">c_</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="n">dd</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">way</span><span class="p">];</span>
+
+		<span class="c1">// 경계를 벗어나면 패스</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">check_boundary</span><span class="p">(</span><span class="n">r_</span><span class="p">,</span> <span class="n">c_</span><span class="p">)</span> <span class="o">==</span> <span class="nb">false</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+
+		<span class="c1">// 맨 앞에 나이가 1인 나무 추가</span>
+		<span class="n">arr_tree</span><span class="p">[</span><span class="n">r_</span><span class="p">][</span><span class="n">c_</span><span class="p">].</span><span class="n">insert</span><span class="p">(</span><span class="n">arr_tree</span><span class="p">[</span><span class="n">r_</span><span class="p">][</span><span class="n">c_</span><span class="p">].</span><span class="n">begin</span><span class="p">(),</span> <span class="mi">1</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//나무를 나이 순으로 정렬</span>
+<span class="kt">void</span> <span class="nf">sorting_trees</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+				<span class="n">sort</span><span class="p">(</span><span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">begin</span><span class="p">(),</span> <span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">end</span><span class="p">());</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 모든 나무들이 영양분을 섭취하고 나이 1 증가</span>
+<span class="kt">void</span> <span class="nf">spring</span><span class="p">()</span> <span class="p">{</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+			<span class="c1">// 해당 위치에 나무의 수 만큼 영양분 섭취</span>
+			<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+				<span class="c1">// 영양분이 충분하지 않다면 해당 나무 위치부터 끝까지 사망 처리 (나이순 정렬 된 조건)</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">arr_n</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">])</span> <span class="p">{</span>
+					<span class="n">arr_dead</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">end</span><span class="p">());</span>	<span class="c1">// 죽어야 할 나무들의 정보 복사</span>
+					<span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">erase</span><span class="p">(</span><span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">end</span><span class="p">());</span>			<span class="c1">// 땅에서 나무들 제거</span>
+					<span class="k">break</span><span class="p">;</span>
+				<span class="p">}</span>
+
+				<span class="c1">// 영양분 공급</span>
+				<span class="n">arr_n</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">-=</span> <span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+				<span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>	<span class="c1">// 입력으로 주어지는 나무의 나이는 10이하지만, 실행 중의 나이제한의 언급은 X</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+<span class="p">}</span>
+
+<span class="c1">// 양분 섭취를 못한 나무들이 (나이/2)만큼 양분으로 변환 됨</span>
+<span class="kt">void</span> <span class="nf">summer</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+			<span class="c1">// 모든 나무들에 대해 처리, 없으면 다음 위치 진행</span>
+			<span class="k">while</span><span class="p">(</span><span class="n">arr_dead</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+				<span class="n">arr_n</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="kt">int</span><span class="p">(</span><span class="n">arr_dead</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">front</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>	<span class="c1">// 맨 앞의 나무부터 계산</span>
+				<span class="n">arr_dead</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">erase</span><span class="p">(</span><span class="n">arr_dead</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">begin</span><span class="p">());</span>	<span class="c1">// 계산된 맨 앞 나무 제거</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 땅에 위치한 나무의 나이가 5의 배수라면, 인접한 8개의 칸에 나이가 1인 나무 번식.</span>
+<span class="kt">void</span> <span class="nf">fall</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			
+			<span class="c1">// 살아있는 모든 나무들에 대해 5의 배수 체크</span>
+			<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">age</span> <span class="o">:</span> <span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">])</span> <span class="p">{</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">age</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+					<span class="n">add_new_tree</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">);</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 로봇이 땅에 양분 추가</span>
+<span class="kt">void</span> <span class="nf">winter</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">arr_n</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">];</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 모든 땅의 나무의 수를 계산하여 반환</span>
+<span class="kt">int</span> <span class="nf">get_total_tree</span><span class="p">()</span> <span class="p">{</span>
+	<span class="kt">int</span> <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			<span class="c1">// 모든 땅의 나무의 수를 계산</span>
+			<span class="n">total</span> <span class="o">+=</span> <span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">].</span><span class="n">size</span><span class="p">();</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">total</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">solution</span><span class="p">()</span> <span class="p">{</span>
+
+	<span class="k">while</span> <span class="p">(</span><span class="n">K</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+		<span class="c1">// 해당 년도의 사망 할 나무를 저장할 배열 초기화</span>
+		<span class="n">arr_dead</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">()));</span>
+
+		<span class="c1">// 봄</span>
+		<span class="c1">//1 ≤ N ≤ 10 이기 때문에 충분히 전체 탐색 할만함.</span>
+		<span class="n">spring</span><span class="p">();</span>
+		<span class="n">summer</span><span class="p">();</span>
+		<span class="n">fall</span><span class="p">();</span>
+		<span class="n">winter</span><span class="p">();</span>
+
+		<span class="n">sorting_trees</span><span class="p">();</span>
+		<span class="n">K</span><span class="o">--</span><span class="p">;</span> <span class="c1">// 실행 횟수 감소</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">get_total_tree</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">N</span> <span class="o">&gt;&gt;</span> <span class="n">M</span> <span class="o">&gt;&gt;</span> <span class="n">K</span><span class="p">;</span>
+
+	<span class="n">arr_tree</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">()));</span>
+	<span class="n">arr_n</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">5</span><span class="p">));</span>	<span class="c1">// 모든 땅에는 처음에 5만큼의 양분이 존재</span>
+	<span class="n">A</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">0</span><span class="p">));</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">r</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">];</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">;</span> <span class="n">m</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="kt">int</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">age</span><span class="p">;</span>
+		<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">r</span> <span class="o">&gt;&gt;</span> <span class="n">c</span> <span class="o">&gt;&gt;</span> <span class="n">age</span><span class="p">;</span>
+		<span class="n">arr_tree</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">push_back</span><span class="p">(</span><span class="n">age</span><span class="p">);</span>	<span class="c1">// 항상 나이 순으로 주어질까?</span>
+	<span class="p">}</span>
+	<span class="n">sorting_trees</span><span class="p">();</span> <span class="c1">// 입력 받은 나무들을 나이 순으로 정렬</span>
+
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">solution</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="해설">해설</h3>
+
+<ul>
+  <li>solution() : K 횟수 만큼 각 계절마다 작업을 진행하고, 총 나무의 수를 반환</li>
+  <li>check_boundary() : 나무를 번식시킬때 필요한 인덱스 체크</li>
+  <li>add_new_tree() : 나무를 각 여덟 방향으로 번식 시킴</li>
+  <li>sorting_trees() : 같은 땅에 존재하는 나무들을 나이 순으로 정렬</li>
+  <li>spring() : 모든 나무들이 영양분을 섭취하고 나이 1 증가시킴</li>
+  <li>summer() : 양분 섭취를 못한 나무들이 (나이/2)만큼 양분으로 변환 됨</li>
+  <li>fall() : 땅에 위치한 나무의 나이가 5의 배수라면, 인접한 8개의 칸에 나이가 1인 나무 번식</li>
+  <li>winter() : 로봇이 땅에 양분 추가
+ <br /></li>
+</ul>
+
+<h3 id="앗-이걸-생각-못했네">앗 이걸 생각 못했네?</h3>
+
+<ul>
+  <li>이런 문제에서 쉽게 실수 할 수 있는 부분은 같은 땅에 존재 하는 나무들의 나이 순서에 따른 정렬 문제라고 생각합니다.
+    <ul>
+      <li>같은 (r,c) 위치에서 나무들의 나이값들을 1차원 배열로 저장하면서, 새로운 나무들을 추가할 때 마다 배열에 앞에 추가하는 것과 뒤로 추가하는 것에 따라 처리 방법이 달라질 수 있습니다.<br />
+ (이 문제 풀이에서는 습관적으로 sort함수가 사용되었지만, 어린 나무를 매번 맨 앞에 추가함으로써 사실상 sort가 필요 없을 수 있습니다…)</li>
+    </ul>
+  </li>
+  <li>초기에 주어지는 나무 위치 값이 1 ~ N 임을 주의히세요.</li>
+  <li>N x N 만큼의 2차원 배열을 모두 순회하는 것이 아닌 나무가 존재하는 땅의 인덱스만 저장하는 배열을 따로 만들어 시간을 감소시킬 수도 있습니다. (N의 크기가 충분히 커진다면,)</li>
+</ul>
+
+<h2 id="다른-풀이">다른 풀이</h2>
+<p><a href="https://github.com/TJ-kor/Solutions/blob/main/Baekjoon/16235_tree_coin.cpp">16235번 나무재테크 1차 풀이</a></p>
+
+<p><a href="https://github.com/TJ-kor/Solutions">기타 다른 문제 풀이 코드 (github)</a></p>
+:ET

@@ -1,0 +1,64 @@
+I"~<h2 id="시작하기">시작하기</h2>
+
+<p>안녕하세요. 이 포스트에서는 Github와 Jekyll을 이용한 github.io 작성을 소개하겠습니다.
+ 다양한 블로그 플랫폼들이 있지만, 자유로운 사용자화와 Git을 이용한 관리의 장점이 있다고 생각하여 Github를 선택하게 되었습니다.</p>
+
+<p>진입 장벽이 다소 있다고 생각을 합니다. 그렇지만 웹과 관련한 경험이 없는 분들에게는 좋은 경험이 될 수도 있다고 생각을 합니다.</p>
+
+<p>소스 코드의 게시도 깔끔하다고 생각합니다.
+ 예시 코드 )</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">insert</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">key</span> <span class="o">==</span> <span class="sc">'\0'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">finish</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="o">*</span><span class="n">key</span> <span class="o">-</span> <span class="sc">'A'</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">next</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="n">next</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Trie</span><span class="p">();</span>
+        <span class="n">next</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">insert</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>다시 본론으로 돌아와서 github.io 작성을 위해 Repository를 생성하고, ruby를 이용한 Jekyll을 설치하는 과정을 소개 하겠습니다.
+ 그리고 온라인에 공유되고 있는 테마 소스를 받아서 적용 해보도록 하겠습니다.</p>
+
+<p>Tips:</p>
+<ul>
+  <li>아래의 링크와 같이 Github에서 공식적으로 소개하는 작성 방법도 있습니다.</li>
+  <li><a href="https://pages.github.com/">https://pages.github.com/</a></li>
+</ul>
+
+<h2 id="github-repository">Github Repository</h2>
+
+<p><a href="https://www.github.com">https://www.github.com</a></p>
+
+<h2 id="ruby">Ruby</h2>
+
+<p><a href="https://rubyinstaller.org/">https://rubyinstaller.org/</a></p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>ruby <span class="nt">-v</span>
+</code></pre></div></div>
+
+<h2 id="jekyll">Jekyll</h2>
+
+<h3 id="설치-및-테스트">설치 및 테스트</h3>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>gem <span class="nb">install </span>jekyll bundle
+<span class="gp">&gt;</span><span class="w"> </span>jekyll <span class="nt">-v</span>
+<span class="gp">&gt;</span><span class="w"> </span>bundle <span class="nt">-v</span>
+</code></pre></div></div>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>jekyll new ./
+<span class="gp">&gt;</span><span class="w"> </span>bundle <span class="nb">install</span>
+</code></pre></div></div>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>bundle <span class="nb">exec </span>jekyll serve
+</code></pre></div></div>
+
+<h3 id="테마-적용하기">테마 적용하기</h3>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>git add <span class="nb">.</span> 
+<span class="gp">&gt;</span><span class="w"> </span>git commit <span class="nt">-m</span> <span class="s2">"any commit messages"</span>
+<span class="gp">&gt;</span><span class="w"> </span>git push
+</code></pre></div></div>
+
+:ET
