@@ -64,7 +64,7 @@ yat:
 # content_width: "920px"
 
 # Google analytics
-  google_analytics: [G-E59DXY1R1X]
+  google_analytics: 'G-E59DXY1R1X'
 
 # If you want to generate website sitemap, you can set true
   sitemap: true
